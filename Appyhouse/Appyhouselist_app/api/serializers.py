@@ -2,12 +2,14 @@ from rest_framework import serializers
 from Appyhouselist_app.models import Company, Property, Comment
 
 class CommentSerializer(serializers.ModelSerializer):
+    comment_user = serializers.StringRelatedField(read_only=True)
     class Meta: 
         model = Comment
         exclude = ["property"]
         #fields = "__all__"
 
 class CommentAllSerializer(serializers.ModelSerializer):
+    comment_user = serializers.StringRelatedField(read_only=True)
     class Meta: 
         model = Comment
         fields = "__all__"

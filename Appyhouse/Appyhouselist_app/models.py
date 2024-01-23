@@ -1,6 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from django.contrib.auth.models import User
 
 class Company(models.Model):
     name = models.CharField(max_length=255)
@@ -52,6 +52,7 @@ class Property(models.Model):
         return self.address
 
 class Comment(models.Model):
+    comment_user = models.ForeignKey(User, on_delete=models.CASCADE)
     qualification = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     text = models.CharField(max_length=255, null=True)
     property = models.ForeignKey(Property, on_delete=models.CASCADE, related_name="comments")

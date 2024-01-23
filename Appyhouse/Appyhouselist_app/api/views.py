@@ -6,13 +6,24 @@ from rest_framework.views import APIView
 from rest_framework import generics, mixins
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import IsAuthenticated
+from Appyhouselist_app.api.permissions import AdminOrReadOnly, CommentUserOrReadOnly
 
 class commentsCreate(generics.CreateAPIView):
     serializer_class = CommentSerializer
+    
+    def get_queryset(self):
+        return Comment.objects.all()
+    
     def perform_create(self, serializer):
         pk = self.kwargs['pk']
         property = Property.objects.get(pk=pk)
-        serializer.save(property = property)
+        user = self.request.user
+        comment_queryset = Comment.objects.filter(property=property, comment_user=user)
+        if comment_queryset.exists():
+            raise ValidationError("El usuario ya escribió un comentario para esta propiedad.")
+        serializer.save(property = property, comment_user = user)
         
 class commentsAll(generics.ListCreateAPIView):
     queryset= Comment.objects.all()
@@ -27,12 +38,15 @@ class commentsList(generics.ListCreateAPIView):
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset= Comment.objects.all()
     serializer_class = CommentSerializer
+    permission_classes = [CommentUserOrReadOnly]
     
 # class CompanyVS(viewsets.ModelViewSet):
+#      permission_classes = [IsAuthenticated]
 #     queryset= Company.objects.all()
 #     serializer_class = CompanySerializer
 
 class CompanyVS(viewsets.ViewSet):
+    permission_classes = [AdminOrReadOnly]
     def list(self, request):
         queryset = Company.objects.all()
         serializer = CompanySerializer(queryset, many=True)
