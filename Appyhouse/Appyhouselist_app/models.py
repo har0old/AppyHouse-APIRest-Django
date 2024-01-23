@@ -45,6 +45,8 @@ class Property(models.Model):
     total_area_square_meters = models.FloatField(validators=[MinValueValidator(0)], default=None)
     image = models.CharField(max_length=900)
     active = models.BooleanField(default=True)
+    avg_qualification = models.FloatField(default=0)
+    number_qualification = models.IntegerField(default=0)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="properties")
     created = models.DateTimeField(auto_now_add=True)
     

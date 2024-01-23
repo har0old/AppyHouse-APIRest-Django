@@ -23,6 +23,15 @@ class commentsCreate(generics.CreateAPIView):
         comment_queryset = Comment.objects.filter(property=property, comment_user=user)
         if comment_queryset.exists():
             raise ValidationError("El usuario ya escribió un comentario para esta propiedad.")
+
+        if property.number_qualification == 0:
+            property.avg_qualification = serializer.validated_data['qualification']
+        else: 
+            property.avg_qualification = (serializer.validated_data['qualification'] + property.avg_qualification)/2
+            
+        property.number_qualification = property.number_qualification + 1
+        property.save()
+        
         serializer.save(property = property, comment_user = user)
         
 class commentsAll(generics.ListCreateAPIView):
@@ -40,6 +49,23 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CommentSerializer
     permission_classes = [CommentUserOrReadOnly]
     
+    def perform_update(self, serializer):
+        # Retrieve the existing comment instance
+        instance = self.get_object()
+
+        # Check if the qualification field is being updated
+        if 'qualification' in serializer.validated_data:
+            # Subtract the old qualification and add the new one
+            instance.property.avg_qualification = (
+                instance.property.avg_qualification -
+                instance.qualification +
+                serializer.validated_data['qualification']
+            )
+            # Save the updated average qualification
+            instance.property.save()
+
+        serializer.save()  # Save the comment instance
+
 # class CompanyVS(viewsets.ModelViewSet):
 #      permission_classes = [IsAuthenticated]
 #     queryset= Company.objects.all()
