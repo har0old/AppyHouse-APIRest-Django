@@ -15,5 +15,6 @@ urlpatterns = [
     path('property/<int:pk>/comment-create/',commentsCreate.as_view(), name='comment-create'),
     path('property/<int:pk>/comment/',commentsList.as_view(), name='comment-list'),
     path('property/comment/<int:pk>',CommentDetail.as_view(), name='comment-detail'),
+
 ]
 

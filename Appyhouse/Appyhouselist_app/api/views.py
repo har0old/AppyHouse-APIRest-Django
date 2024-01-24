@@ -8,11 +8,11 @@ from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
-from Appyhouselist_app.api.permissions import AdminOrReadOnly, CommentUserOrReadOnly
+from Appyhouselist_app.api.permissions import IsAdminOrReadOnly, IsCommentUserOrReadOnly
 
 class commentsCreate(generics.CreateAPIView):
     serializer_class = CommentSerializer
-    
+    permission_classes = [IsAuthenticated]
     def get_queryset(self):
         return Comment.objects.all()
     
@@ -40,6 +40,7 @@ class commentsAll(generics.ListCreateAPIView):
     
 class commentsList(generics.ListCreateAPIView):
     serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
     def get_queryset(self):
         pk = self.kwargs['pk']
         return Comment.objects.filter(property=pk)
@@ -47,7 +48,7 @@ class commentsList(generics.ListCreateAPIView):
 class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset= Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = [CommentUserOrReadOnly]
+    permission_classes = [IsCommentUserOrReadOnly]
     
     def perform_update(self, serializer):
         # Retrieve the existing comment instance
@@ -72,7 +73,7 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
 #     serializer_class = CompanySerializer
 
 class CompanyVS(viewsets.ViewSet):
-    permission_classes = [AdminOrReadOnly]
+    permission_classes = [IsAdminOrReadOnly]
     def list(self, request):
         queryset = Company.objects.all()
         serializer = CompanySerializer(queryset, many=True)
@@ -156,6 +157,7 @@ class CompanyDetailAV(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
     
 class PropertyListAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     def get(self, request):
         property = Property.objects.all()
         serializer = PropertySerializer(property, many=True)
@@ -170,6 +172,7 @@ class PropertyListAV(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 class PropertyDetailAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     def get(self, request, pk):
         try:        
             property = Property.objects.get(pk=pk)
