@@ -9,10 +9,13 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from Appyhouselist_app.api.permissions import IsAdminOrReadOnly, IsCommentUserOrReadOnly
+from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
+from Appyhouselist_app.api.throttling import CommentCreateThrottle
 
 class commentsCreate(generics.CreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
+    throttle_classes = [CommentCreateThrottle]
     def get_queryset(self):
         return Comment.objects.all()
     
@@ -35,12 +38,14 @@ class commentsCreate(generics.CreateAPIView):
         serializer.save(property = property, comment_user = user)
         
 class commentsAll(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset= Comment.objects.all()
     serializer_class = CommentAllSerializer
     
 class commentsList(generics.ListCreateAPIView):
+    throttle_classes = [UserRateThrottle, AnonRateThrottle]
     serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     def get_queryset(self):
         pk = self.kwargs['pk']
         return Comment.objects.filter(property=pk)
@@ -49,6 +54,8 @@ class CommentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset= Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [IsCommentUserOrReadOnly]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope='commet-detail'
     
     def perform_update(self, serializer):
         # Retrieve the existing comment instance
