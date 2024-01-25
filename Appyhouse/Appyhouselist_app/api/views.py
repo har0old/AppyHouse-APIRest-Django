@@ -11,7 +11,22 @@ from rest_framework.permissions import IsAuthenticated
 from Appyhouselist_app.api.permissions import IsAdminOrReadOnly, IsCommentUserOrReadOnly
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle, ScopedRateThrottle
 from Appyhouselist_app.api.throttling import CommentCreateThrottle
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
+
+class GetCommentsPerUser(generics.ListAPIView):
+    #permission_classes = [IsAuthenticated]
+    serializer_class = CommentSerializer
+    def get_queryset(self):
+        username = self.request.query_params.get('username', None)
+        return Comment.objects.filter(comment_user__username = username)
+    
+    # def get_queryset(self):
+    #     username = self.kwargs['username']
+    #     return Comment.objects.filter(comment_user__username = username)
+    
+         
 class commentsCreate(generics.CreateAPIView):
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticated]
@@ -43,8 +58,11 @@ class commentsAll(generics.ListCreateAPIView):
     serializer_class = CommentAllSerializer
     
 class commentsList(generics.ListCreateAPIView):
-    throttle_classes = [UserRateThrottle, AnonRateThrottle]
     serializer_class = CommentSerializer
+    throttle_classes = [UserRateThrottle, AnonRateThrottle]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['comment_user__username', 'active']
+    
     #permission_classes = [IsAuthenticated]
     def get_queryset(self):
         pk = self.kwargs['pk']
@@ -162,7 +180,16 @@ class CompanyDetailAV(APIView):
             return Response({'Error':'Empresa no encontrada'}, status=status.HTTP_404_NOT_FOUND)
         company.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class PropertyList(generics.ListAPIView):
+    queryset= Property.objects.all()
+    serializer_class = PropertySerializer
+    #filter_backends = [DjangoFilterBackend]
+    #filterset_fields = ['address', 'company__name']
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['address', 'company__name']
     
+
 class PropertyListAV(APIView):
     permission_classes = [IsAdminOrReadOnly]
     def get(self, request):

@@ -17,6 +17,7 @@ class CommentAllSerializer(serializers.ModelSerializer):
 class PropertySerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
     longigitude_address = serializers.SerializerMethodField()
+    company_name = serializers.CharField(source='company.name')
     class Meta:
         model = Property
         fields = "__all__"

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'user_app',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -137,15 +139,17 @@ REST_FRAMEWORK = {
     #     'rest_framework.throttling.UserRateThrottle',
     # ],
     'DEFAULT_THROTTLE_RATES':{
-        'anon': '10/day',
-        'user': '1000/day',
-        'comment-create':'2/day',
-        'commet-detail':'3/day',
+        'anon': '1000/day',
+        'user': '10000/day',
+        'comment-create':'20/day',
+        'commet-detail':'30/day',
     }
 }
 
 SIMPLE_JWT = {
-    'ROTATE_REFRESH_TOKENS': True 
+    'ROTATE_REFRESH_TOKENS': True,
+    'ACCESS_TOKEN_LIFETIME':timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME':timedelta(days=1),
 }
 
 # REST_FRAMEWORK = {
