@@ -143,7 +143,9 @@ REST_FRAMEWORK = {
         'user': '10000/day',
         'comment-create':'20/day',
         'commet-detail':'30/day',
-    }
+    },
+    #'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.LimitOffsetPagination',
+    #'PAGE_SIZE':10,
 }
 
 SIMPLE_JWT = {

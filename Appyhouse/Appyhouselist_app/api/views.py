@@ -1,4 +1,5 @@
 from rest_framework.response import Response
+from Appyhouselist_app.api.paginations import PropertyLOPagination, PropertyPagination
 from Appyhouselist_app.api.serializers import CommentSerializer, CompanySerializer, PropertySerializer, CommentAllSerializer
 from Appyhouselist_app.models import Comment, Company, Property
 from rest_framework import status
@@ -187,7 +188,8 @@ class PropertyList(generics.ListAPIView):
     #filter_backends = [DjangoFilterBackend]
     #filterset_fields = ['address', 'company__name']
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['address', 'company__name']
+    search_fields = ['address', 'company__name', 'price']
+    pagination_class =  PropertyPagination #PropertyLOPagination 
     
 
 class PropertyListAV(APIView):
